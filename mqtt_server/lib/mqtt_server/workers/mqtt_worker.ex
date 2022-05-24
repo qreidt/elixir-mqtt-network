@@ -23,13 +23,13 @@ defmodule MQTTServer.Workers.MQTTWorker do
 
   defp setup_emqtt() do
     config = Application.get_env(:mqtt_server, :emqtt)
-    |> IO.inspect
+
     {:ok, conn} = :emqtt.start_link(config)
 
     :emqtt.connect(conn)
 
-    :emqtt.subscribe(conn, "/g/+/status")
-    :emqtt.subscribe(conn, "/g/+/data")
+    :emqtt.subscribe(conn, "/g/+/")
+    :emqtt.subscribe(conn, "/g/+/status", [qos: 1])
 
     conn
   end
@@ -47,13 +47,13 @@ defmodule MQTTServer.Workers.MQTTWorker do
   #
 
   def handle_info({:publish, packet}, state) do
-    IO.inspect(Map.take(packet, [:topic, :payload]))
-
     topic = String.split(packet.topic, "/", trim: true)
 
     case topic do
-      ["g", gateway_id, "status"] -> update_gateway_status(gateway_id, packet.payload, state.mdb_conn)
-      ["g", gateway_id, "data"] -> create_dots(gateway_id, packet.payload, state.mdb_conn)
+      ["g", gateway_id] -> create_dots(gateway_id, packet.payload, state.mdb_conn)
+      ["g", gateway_id, "status"] ->
+        IO.inspect(packet)
+        update_gateway_status(gateway_id, packet.payload, state.mdb_conn)
     end
 
     {:noreply, state}

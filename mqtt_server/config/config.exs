@@ -44,7 +44,7 @@ import_config "#{config_env()}.exs"
 config :mqtt_server, :emqtt,
   host: to_charlist(System.get_env("MQTT_BROKER_HOST", "127.0.0.1")),
   port: String.to_integer(System.get_env("MQTT_BROKER_PORT", "1883")),
-  clientid: System.get_env("MQTT_BROKER_CLIENTID", "Main Server"),
+  clientid: System.get_env("MQTT_CLIENT_NAME", "Main Server"),
   clean_start: true
 
 config :mqtt_server, :mongodb,
